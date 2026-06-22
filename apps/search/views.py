@@ -94,12 +94,36 @@ def _get_branch_facets(query, is_postgres):
     """Подсчёт количества норм и практики по отраслям для текущего запроса."""
     counts = defaultdict(int)
 
-    norm_qs = _build_norm_qs(query, is_postgres).filter(branch__isnull=False)
-    case_qs = _build_case_qs(query, is_postgres).filter(branch__isnull=False)
+    if is_postgres:
+        from django.contrib.postgres.search import SearchVector, SearchQuery
+        sq = SearchQuery(query, config='russian', search_type='websearch')
+        norm_rows = (
+            Norm.objects
+            .annotate(search=SearchVector('title', 'article', 'text', config='russian'))
+            .filter(search=sq, branch__isnull=False)
+            .values('branch__id', 'branch__name').annotate(n=Count('id'))
+        )
+        case_rows = (
+            CourtCase.objects
+            .annotate(search=SearchVector('case_number', 'thesis', 'text', config='russian'))
+            .filter(search=sq, branch__isnull=False)
+            .values('branch__id', 'branch__name').annotate(n=Count('id'))
+        )
+    else:
+        norm_rows = (
+            Norm.objects
+            .filter(Q(title__icontains=query) | Q(text__icontains=query), branch__isnull=False)
+            .values('branch__id', 'branch__name').annotate(n=Count('id'))
+        )
+        case_rows = (
+            CourtCase.objects
+            .filter(Q(thesis__icontains=query) | Q(text__icontains=query), branch__isnull=False)
+            .values('branch__id', 'branch__name').annotate(n=Count('id'))
+        )
 
-    for row in norm_qs.values('branch__id', 'branch__name').annotate(n=Count('id')):
+    for row in norm_rows:
         counts[(row['branch__id'], row['branch__name'])] += row['n']
-    for row in case_qs.values('branch__id', 'branch__name').annotate(n=Count('id')):
+    for row in case_rows:
         counts[(row['branch__id'], row['branch__name'])] += row['n']
 
     return sorted(counts.items(), key=lambda x: -x[1])
