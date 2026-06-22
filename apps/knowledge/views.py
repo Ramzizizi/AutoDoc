@@ -4,6 +4,7 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.urls import reverse
 
+from apps.accounts.roles import is_analyst
 from .models import Norm, CourtCase, LegalOpinion
 
 
@@ -124,6 +125,8 @@ def case_list(request):
 @login_required
 def opinion_list(request):
     qs = LegalOpinion.objects.select_related('author').order_by('-created_at')
+    if not is_analyst(request.user):
+        qs = qs.filter(is_public=True)
     paginator = Paginator(qs, 20)
     page = paginator.get_page(request.GET.get('page'))
     return render(request, 'knowledge/opinion_list.html', {'page': page})
@@ -134,18 +137,37 @@ def opinion_list(request):
 @login_required
 def norm_detail(request, pk):
     norm = get_object_or_404(Norm.objects.select_related('branch'), pk=pk)
-    return render(request, 'knowledge/norm_detail.html', {'norm': norm})
+    related_cases = list(norm.court_cases.select_related('branch')[:8])
+    related_opinions = list(norm.opinions.all()[:8])
+    return render(request, 'knowledge/norm_detail.html', {
+        'norm': norm,
+        'related_cases': related_cases,
+        'related_opinions': related_opinions,
+    })
 
 
 @login_required
 def case_detail(request, pk):
     case = get_object_or_404(CourtCase.objects.select_related('branch'), pk=pk)
-    return render(request, 'knowledge/case_detail.html', {'case': case})
+    related_norms = list(case.related_norms.select_related('branch')[:8])
+    related_opinions = list(case.opinions.all()[:8])
+    return render(request, 'knowledge/case_detail.html', {
+        'case': case,
+        'related_norms': related_norms,
+        'related_opinions': related_opinions,
+    })
 
 
 @login_required
 def opinion_detail(request, pk):
-    opinion = get_object_or_404(
-        LegalOpinion.objects.select_related('author'), pk=pk
-    )
-    return render(request, 'knowledge/opinion_detail.html', {'opinion': opinion})
+    qs = LegalOpinion.objects.select_related('author')
+    if not is_analyst(request.user):
+        qs = qs.filter(is_public=True)
+    opinion = get_object_or_404(qs, pk=pk)
+    related_norms = list(opinion.related_norms.select_related('branch')[:8])
+    related_cases = list(opinion.related_cases.select_related('branch')[:8])
+    return render(request, 'knowledge/opinion_detail.html', {
+        'opinion': opinion,
+        'related_norms': related_norms,
+        'related_cases': related_cases,
+    })

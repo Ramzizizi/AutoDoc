@@ -3,8 +3,12 @@ from urllib.parse import quote
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
+from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Cm, Pt
 
 from apps.accounts.decorators import analyst_required
 from apps.knowledge.models import Norm, CourtCase
@@ -107,11 +111,6 @@ def export_docx(request):
 # ─── docx builder ────────────────────────────────────────────────────────────
 
 def _build_docx(title, question, norms, cases, conclusion, user):
-    from docx import Document
-    from docx.shared import Pt, Cm
-    from docx.enum.text import WD_ALIGN_PARAGRAPH
-    from django.utils import timezone
-
     doc = Document()
 
     for section in doc.sections:
@@ -165,7 +164,6 @@ def _build_docx(title, question, norms, cases, conclusion, user):
 
 
 def _heading(doc, text):
-    from docx.shared import Pt
     p = doc.add_paragraph(text)
     run = p.runs[0]
     run.bold = True
@@ -173,7 +171,6 @@ def _heading(doc, text):
 
 
 def _para(doc, text):
-    from docx.shared import Pt, Cm
     p = doc.add_paragraph(text)
     p.paragraph_format.first_line_indent = Cm(1.25)
     p.runs[0].font.size = Pt(12)
@@ -181,7 +178,6 @@ def _para(doc, text):
 
 
 def _norm_block(doc, norm):
-    from docx.shared import Pt, Cm
     p = doc.add_paragraph(style='List Bullet')
     run = p.add_run(norm.article or norm.title)
     run.bold = True
@@ -196,7 +192,6 @@ def _norm_block(doc, norm):
 
 
 def _case_block(doc, case):
-    from docx.shared import Pt, Cm
     p = doc.add_paragraph(style='List Bullet')
     run = p.add_run(case.case_number)
     run.bold = True

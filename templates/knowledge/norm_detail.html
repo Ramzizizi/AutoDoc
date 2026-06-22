@@ -79,16 +79,16 @@
 
     <!-- Связанные материалы -->
     <div class="row g-3">
-        {% if norm.court_cases.exists %}
+        {% if related_cases %}
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-transparent fw-semibold">
                     <i class="bi bi-bank text-success me-1"></i>
                     Судебная практика
-                    <span class="badge bg-success ms-1">{{ norm.court_cases.count }}</span>
+                    <span class="badge bg-success ms-1">{{ related_cases|length }}</span>
                 </div>
                 <ul class="list-group list-group-flush">
-                    {% for case in norm.court_cases.all|slice:":8" %}
+                    {% for case in related_cases %}
                     <li class="list-group-item list-group-item-action px-3 py-2">
                         <a href="{% url 'knowledge:case_detail' case.pk %}" class="text-decoration-none text-dark">
                             <div class="small fw-semibold">{{ case.case_number }}</div>
@@ -101,16 +101,16 @@
         </div>
         {% endif %}
 
-        {% if norm.opinions.exists %}
+        {% if related_opinions %}
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-transparent fw-semibold">
                     <i class="bi bi-journal-check text-warning me-1"></i>
                     Правовые заключения
-                    <span class="badge bg-warning text-dark ms-1">{{ norm.opinions.count }}</span>
+                    <span class="badge bg-warning text-dark ms-1">{{ related_opinions|length }}</span>
                 </div>
                 <ul class="list-group list-group-flush">
-                    {% for opinion in norm.opinions.all|slice:":8" %}
+                    {% for opinion in related_opinions %}
                     <li class="list-group-item list-group-item-action px-3 py-2">
                         <a href="{% url 'knowledge:opinion_detail' opinion.pk %}" class="text-decoration-none text-dark">
                             <div class="small">{{ opinion.title|truncatechars:90 }}</div>

@@ -164,3 +164,33 @@ class TestKnowledgeViews(TestCase):
         ]:
             resp = self.client.get(url)
             assert resp.status_code == 302
+
+    def test_reader_sees_only_public_opinions(self):
+        private_op = LegalOpinion.objects.create(
+            title='Закрытое заключение', text='Текст.', is_public=False,
+        )
+        resp = self.client.get(reverse('knowledge:opinion_list'))
+        content = resp.content.decode()
+        assert 'Заключение' in content          # публичное (setUp, is_public=True)
+        assert 'Закрытое заключение' not in content
+
+    def test_reader_blocked_from_private_opinion_detail(self):
+        private_op = LegalOpinion.objects.create(
+            title='Закрытое', text='Текст.', is_public=False,
+        )
+        resp = self.client.get(reverse('knowledge:opinion_detail', args=[private_op.pk]))
+        assert resp.status_code == 404
+
+    def test_analyst_sees_private_opinion(self):
+        from django.contrib.auth.models import Group
+        from apps.accounts.roles import ROLE_ANALYST
+        analyst = User.objects.create_user(username='analyst_k', password='p')
+        group, _ = Group.objects.get_or_create(name=ROLE_ANALYST)
+        analyst.groups.add(group)
+        self.client.force_login(analyst)
+
+        private_op = LegalOpinion.objects.create(
+            title='Закрытое', text='Текст.', is_public=False,
+        )
+        resp = self.client.get(reverse('knowledge:opinion_detail', args=[private_op.pk]))
+        assert resp.status_code == 200

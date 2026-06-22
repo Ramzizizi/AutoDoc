@@ -59,16 +59,16 @@
 
     <!-- Связанные материалы -->
     <div class="row g-3">
-        {% if opinion.related_norms.exists %}
+        {% if related_norms %}
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-transparent fw-semibold">
                     <i class="bi bi-file-text text-primary me-1"></i>
                     Нормы права
-                    <span class="badge bg-primary ms-1">{{ opinion.related_norms.count }}</span>
+                    <span class="badge bg-primary ms-1">{{ related_norms|length }}</span>
                 </div>
                 <ul class="list-group list-group-flush">
-                    {% for norm in opinion.related_norms.all %}
+                    {% for norm in related_norms %}
                     <li class="list-group-item list-group-item-action px-3 py-2">
                         <a href="{% url 'knowledge:norm_detail' norm.pk %}" class="text-decoration-none text-dark">
                             <div class="small fw-semibold">{{ norm.article }}</div>
@@ -81,16 +81,16 @@
         </div>
         {% endif %}
 
-        {% if opinion.related_cases.exists %}
+        {% if related_cases %}
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-transparent fw-semibold">
                     <i class="bi bi-bank text-success me-1"></i>
                     Судебная практика
-                    <span class="badge bg-success ms-1">{{ opinion.related_cases.count }}</span>
+                    <span class="badge bg-success ms-1">{{ related_cases|length }}</span>
                 </div>
                 <ul class="list-group list-group-flush">
-                    {% for case in opinion.related_cases.all %}
+                    {% for case in related_cases %}
                     <li class="list-group-item list-group-item-action px-3 py-2">
                         <a href="{% url 'knowledge:case_detail' case.pk %}" class="text-decoration-none text-dark">
                             <div class="small fw-semibold">{{ case.case_number }}</div>

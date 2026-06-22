@@ -75,16 +75,16 @@
 
     <!-- Связанные материалы -->
     <div class="row g-3">
-        {% if case.related_norms.exists %}
+        {% if related_norms %}
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-transparent fw-semibold">
                     <i class="bi bi-file-text text-primary me-1"></i>
                     Нормы права
-                    <span class="badge bg-primary ms-1">{{ case.related_norms.count }}</span>
+                    <span class="badge bg-primary ms-1">{{ related_norms|length }}</span>
                 </div>
                 <ul class="list-group list-group-flush">
-                    {% for norm in case.related_norms.all %}
+                    {% for norm in related_norms %}
                     <li class="list-group-item list-group-item-action px-3 py-2">
                         <a href="{% url 'knowledge:norm_detail' norm.pk %}" class="text-decoration-none text-dark">
                             <div class="small fw-semibold">{{ norm.article }}</div>
@@ -97,16 +97,16 @@
         </div>
         {% endif %}
 
-        {% if case.opinions.exists %}
+        {% if related_opinions %}
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-transparent fw-semibold">
                     <i class="bi bi-journal-check text-warning me-1"></i>
                     Правовые заключения
-                    <span class="badge bg-warning text-dark ms-1">{{ case.opinions.count }}</span>
+                    <span class="badge bg-warning text-dark ms-1">{{ related_opinions|length }}</span>
                 </div>
                 <ul class="list-group list-group-flush">
-                    {% for opinion in case.opinions.all %}
+                    {% for opinion in related_opinions %}
                     <li class="list-group-item list-group-item-action px-3 py-2">
                         <a href="{% url 'knowledge:opinion_detail' opinion.pk %}" class="text-decoration-none text-dark">
                             <div class="small">{{ opinion.title|truncatechars:90 }}</div>
