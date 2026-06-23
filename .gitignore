@@ -242,3 +242,4 @@ cython_debug/
 .idea/
 
 test_curl.sqlite3
+certs/
