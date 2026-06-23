@@ -1,5 +1,0 @@
-https://31.77.193.99 {
-	tls internal
-
-	reverse_proxy web:8000
-}
